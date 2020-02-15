@@ -10,10 +10,10 @@ import (
 	wrapping "github.com/hashicorp/go-kms-wrapping"
 	"github.com/hashicorp/vault/api"
 	"github.com/hashicorp/vault/builtin/logical/transit"
-	commandseal "github.com/hashicorp/vault/command/server/seal"
 	"github.com/hashicorp/vault/helper/testhelpers"
 	"github.com/hashicorp/vault/helper/testhelpers/teststorage"
 	vaulthttp "github.com/hashicorp/vault/http"
+	"github.com/hashicorp/vault/internalshared/configutil"
 	"github.com/hashicorp/vault/sdk/helper/logging"
 	"github.com/hashicorp/vault/sdk/logical"
 	"github.com/hashicorp/vault/vault"
@@ -70,13 +70,13 @@ func (tss *transitSealServer) makeSeal(t *testing.T, key string) vault.Seal {
 		"key_name":    key,
 		"tls_ca_cert": tss.CACertPEMFile,
 	}
-	transitSeal, _, err := commandseal.GetTransitKMSFunc(nil, wrapperConfig)
+	kms, _, err := configutil.GetTransitKMSFunc(nil, wrapperConfig)
 	if err != nil {
 		t.Fatalf("error setting wrapper config: %v", err)
 	}
 
 	return vault.NewAutoSeal(&seal.Access{
-		Wrapper: transitSeal,
+		Wrapper: kms,
 	})
 }
 
